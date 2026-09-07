@@ -2,6 +2,7 @@ services:
   - type: web
     name: eduvatar-backend
     runtime: python
+    plan: free
     buildCommand: "pip install -r backend/requirements.txt"
     startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
@@ -10,18 +11,11 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: eduvatar-db
-          property: connectionString
+        value: "sqlite:///./eduvatar.db"
       - key: JWT_SECRET
         generateValue: true
       - key: LLM_PROVIDER
         value: demo
       - key: CORS_ORIGINS
-        value: "https://eduvatar-ai.vercel.app,http://localhost:5173"
+        value: "*"
 
-databases:
-  - name: eduvatar-db
-    databaseName: eduvatar
-    user: eduvatar_user
-    plan: free
