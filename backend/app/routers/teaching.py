@@ -11,6 +11,7 @@ from app.schemas.teaching import (
     TeachingFeedbackResponse,
     ContextualAskRequest,
     ContextualAskResponse,
+    AvatarState,
 )
 from app.utils.security import get_current_user
 from app.agents.misconception_detector import MisconceptionDetector
@@ -21,6 +22,15 @@ from app.rag.retriever import DocumentRetriever
 from app.utils.logger import logger
 
 router = APIRouter(prefix="/api/teaching", tags=["Interactive Teaching"])
+
+@router.get("/avatar-state", response_model=AvatarState)
+async def get_avatar_state(emotion: str = "explaining", is_speaking: bool = False):
+    return AvatarState(
+        emotion=emotion,
+        is_speaking=is_speaking,
+        viseme="aa" if is_speaking else "sil",
+        gesture="pointing_visual" if emotion == "explaining" else "nodding",
+    )
 
 # In-memory connection manager for WebSockets
 class ConnectionManager:

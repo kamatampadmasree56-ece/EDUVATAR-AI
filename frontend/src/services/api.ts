@@ -170,10 +170,12 @@ export const lessonApi = {
 // Interactive Teaching API
 // -------------------------------------------------------------
 export const teachingApi = {
-  async submitAnswer(questionId: number, answer: string, responseTimeSec: number = 4.5): Promise<EvaluationResult> {
-    return request<EvaluationResult>(`/teaching/submit-answer/${questionId}`, {
+  async submitAnswer(lessonId: number, questionId: number, answer: string, responseTimeSec: number = 4.5): Promise<EvaluationResult> {
+    return request<EvaluationResult>('/teaching/respond', {
       method: 'POST',
       body: JSON.stringify({
+        lesson_id: lessonId,
+        question_id: questionId,
         student_answer: answer,
         response_time_seconds: responseTimeSec,
       }),
@@ -181,14 +183,24 @@ export const teachingApi = {
   },
 
   async askTeacher(lessonId: number, currentSectionIndex: number, userQuery: string): Promise<TeacherAnswer> {
-    return request<TeacherAnswer>('/teaching/ask', {
+    const response = await request<{
+      teacher_reply: string;
+      concept_referenced: string;
+      source_citation?: string | null;
+      recommended_focus?: string | null;
+    }>('/teaching/ask', {
       method: 'POST',
       body: JSON.stringify({
         lesson_id: lessonId,
         current_section_index: currentSectionIndex,
-        user_query: userQuery,
+        student_question: userQuery,
       }),
     });
+    return {
+      answer: response.teacher_reply,
+      analogy: response.recommended_focus,
+      avatar_emotion: 'explaining',
+    };
   },
 
   async getAvatarState(emotion: string = 'explaining', isSpeaking: boolean = false): Promise<AvatarState> {

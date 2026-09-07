@@ -9,7 +9,7 @@ from app.routers.auth import ensure_demo_user, router as auth_router
 from app.routers.documents import router as documents_router
 from app.routers.lessons import router as lessons_router
 from app.routers.teaching import router as teaching_router
-from app.routers.assessments import router as assessments_router
+from app.routers.assessments import router as assessments_router, legacy_router as assessments_legacy_router
 from app.routers.analytics import router as analytics_router
 from app.routers.learning_paths import router as learning_paths_router
 from app.routers.speech import router as speech_router
@@ -21,6 +21,62 @@ from app.utils.logger import logger
 async def lifespan(app: FastAPI):
     # Startup: Ensure database tables are created
     logger.info("Initializing database schemas...")
+
+    # Apply safe runtime migrations for SQLite (development convenience)
+    try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(engine)
+        if engine.dialect.name == "sqlite":
+            tables = inspector.get_table_names()
+            if 'lessons' in tables:
+                cols = inspector.get_columns('lessons')
+                col_names = [c['name'] for c in cols]
+                if 'learning_mode' not in col_names:
+                    logger.info("Applying lightweight migration: add 'learning_mode' column to lessons table")
+                    with engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE lessons ADD COLUMN learning_mode VARCHAR(50) DEFAULT 'complete_learning'"))
+                        conn.commit()
+                if 'curriculum_summary' not in col_names:
+                    logger.info("Applying lightweight migration: add 'curriculum_summary' column to lessons table")
+                    with engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE lessons ADD COLUMN curriculum_summary JSON DEFAULT '{}'"))
+                        conn.commit()
+                # Check lesson_sections columns
+                ls_cols = [c['name'] for c in inspector.get_columns('lesson_sections')] if 'lesson_sections' in tables else []
+                to_add = []
+                if 'prerequisites' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN prerequisites JSON DEFAULT '[]'")
+                if 'importance' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN importance VARCHAR(50) DEFAULT 'high'")
+                if 'status' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN status VARCHAR(50) DEFAULT 'not_started'")
+                if 'scenes' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN scenes JSON DEFAULT '[]'")
+                if 'visual_type' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN visual_type VARCHAR(50) DEFAULT 'katex'")
+                if 'visual_data' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN visual_data JSON DEFAULT '{}'" )
+                if 'visual_caption' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN visual_caption VARCHAR(255) DEFAULT ''")
+                if 'key_points' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN key_points JSON DEFAULT '[]'")
+                if 'narration_script' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN narration_script TEXT DEFAULT ''")
+                if 'estimated_minutes' not in ls_cols:
+                    to_add.append("ALTER TABLE lesson_sections ADD COLUMN estimated_minutes INTEGER DEFAULT 3")
+
+                if to_add:
+                    logger.info(f"Applying lightweight migrations to lesson_sections: adding {len(to_add)} columns")
+                    with engine.connect() as conn:
+                        for stmt in to_add:
+                            try:
+                                conn.execute(text(stmt))
+                            except Exception as e:
+                                logger.warning(f"Migration statement failed: {e}")
+                        conn.commit()
+    except Exception as mig_err:
+        logger.warning(f"Runtime migration skipped or failed: {mig_err}")
+
     Base.metadata.create_all(bind=engine)
     
     # Ensure demo user and demo Ohm's law lesson exist
@@ -72,6 +128,7 @@ app.include_router(documents_router)
 app.include_router(lessons_router)
 app.include_router(teaching_router)
 app.include_router(assessments_router)
+app.include_router(assessments_legacy_router)
 app.include_router(analytics_router)
 app.include_router(learning_paths_router)
 app.include_router(speech_router)

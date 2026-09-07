@@ -294,12 +294,39 @@ class DemoEmbeddingProvider(EmbeddingProvider):
 
 class DemoTTSProvider(TTSProvider):
     async def synthesize(self, text: str, voice: str = "default", language: str = "en") -> Dict[str, Any]:
-        # Return structured audio cues for client-side Web Speech synthesis or pre-buffered audio
+        # If server-side TTS is enabled, register the text and return an audio URL
+        import os
+        import hashlib
+        from app.utils.logger import logger
+
+        estimated_duration = max(2.0, len(text.split()) * 0.4)
+
+        if os.getenv("ENABLE_SERVER_TTS", "0") == "1":
+            # Create a stable short id for the requested text
+            audio_id = hashlib.sha256(text.encode('utf-8')).hexdigest()[:12]
+            try:
+                # Lazy import to avoid circulars; register the text for on-demand audio generation
+                from app.speech.tts import register_text_for_audio
+
+                register_text_for_audio(audio_id, text, voice=voice, language=language)
+                logger.info(f"Registered server-side TTS audio id={audio_id}")
+                return {
+                    "mode": "server_audio",
+                    "audio_id": audio_id,
+                    "audio_url": f"/api/speech/audio/{audio_id}",
+                    "estimated_duration_seconds": estimated_duration,
+                    "voice": voice,
+                }
+            except Exception:
+                # Fall back to client speech if registration fails
+                logger.exception("Failed to register server TTS; falling back to client_speech")
+
+        # Default: Return structured cues for client-side Web Speech synthesis
         return {
             "mode": "client_speech",
             "text": text,
             "language": language,
-            "estimated_duration_seconds": max(2.0, len(text.split()) * 0.4),
+            "estimated_duration_seconds": estimated_duration,
             "voice": voice,
             "visemes": [
                 {"time": 0.0, "value": "sil"},

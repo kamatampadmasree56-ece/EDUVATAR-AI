@@ -1,8 +1,19 @@
 // Browser Web Speech API service for TTS and STT
 
+type SpeechOptions = {
+  rate?: number;
+  pitch?: number;
+  onStart?: () => void;
+  onViseme?: (viseme: 'aa' | 'ee' | 'oo' | 'mm' | 'sil') => void;
+  onEnd?: () => void;
+  onError?: () => void;
+};
+
 class SpeechService {
   private synth: SpeechSynthesis | null = null;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private currentAudio: HTMLAudioElement | null = null;
+  private serverVisemeTimers: number[] = [];
   private recognition: any = null;
   public isSpeechSupported: boolean = false;
   public isRecognitionSupported: boolean = false;
@@ -28,17 +39,53 @@ class SpeechService {
   /**
    * Speak text with viseme simulation and callbacks
    */
-  speak(
+  async speak(
     text: string,
-    options?: {
-      rate?: number;
-      pitch?: number;
-      onStart?: () => void;
-      onViseme?: (viseme: 'aa' | 'ee' | 'oo' | 'mm' | 'sil') => void;
-      onEnd?: () => void;
-      onError?: () => void;
-    }
+    options?: SpeechOptions
   ) {
+    // Prefer server-side TTS when available: ask the backend to synthesize first.
+    try {
+      const resp = await fetch('/api/speech/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: 'default', language: 'en' }),
+      });
+
+      if (resp.ok) {
+        const payload = await resp.json();
+        if (payload.mode === 'server_audio' && payload.audio_url) {
+          this.stop();
+          const audio = new Audio(payload.audio_url);
+          this.currentAudio = audio;
+          let fallbackStarted = false;
+          const fallbackToBrowser = () => {
+            if (fallbackStarted) return;
+            fallbackStarted = true;
+            this.speakWithBrowser(text, options);
+          };
+          if (payload.visemes && Array.isArray(payload.visemes)) {
+            payload.visemes.forEach((v: any) => {
+              this.serverVisemeTimers.push(window.setTimeout(() => options?.onViseme?.(v.value || 'sil'), Math.max(0, Math.floor((v.time || 0) * 1000))));
+            });
+          }
+          audio.onplay = () => options?.onStart?.();
+          audio.onended = () => {
+            options?.onViseme?.('sil');
+            options?.onEnd?.();
+          };
+          audio.onerror = fallbackToBrowser;
+          audio.play().catch(fallbackToBrowser);
+          return;
+        }
+      }
+    } catch (e) {
+      // ignore and fall back to browser speech
+    }
+
+    this.speakWithBrowser(text, options);
+  }
+
+  private speakWithBrowser(text: string, options?: SpeechOptions) {
     if (!this.synth || !this.isSpeechSupported) {
       // Fallback: simulate timer callbacks so avatar doesn't get stuck
       options?.onStart?.();
@@ -111,6 +158,13 @@ class SpeechService {
   }
 
   stop() {
+    this.serverVisemeTimers.forEach((timer) => window.clearTimeout(timer));
+    this.serverVisemeTimers = [];
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.src = '';
+      this.currentAudio = null;
+    }
     if (this.synth) {
       this.synth.cancel();
     }

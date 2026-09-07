@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database.session import get_db
@@ -17,6 +17,9 @@ from app.ai.factory import get_llm_provider
 from app.utils.logger import logger
 
 router = APIRouter(prefix="/api/assessments", tags=["Assessments & Report Card"])
+
+# Legacy compatibility router (singular) used by some tests and older clients
+legacy_router = APIRouter(prefix="/api/assessment", tags=["Assessments & Report Card"])
 
 @router.post("/generate", response_model=AssessmentResponse)
 @router.post("/create", response_model=AssessmentResponse)
@@ -103,6 +106,16 @@ async def generate_assessment(
     db.refresh(assessment)
     return AssessmentResponse.model_validate(assessment)
 
+
+# --- Legacy singular endpoints that forward to the plural implementations ---
+@legacy_router.post("/generate", response_model=AssessmentResponse)
+async def legacy_generate_assessment(
+    req: AssessmentGenerateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return await generate_assessment(req, current_user, db)
+
 @router.post("/submit", response_model=AssessmentResponse)
 @router.post("/{assessment_id}/submit", response_model=AssessmentResponse)
 def submit_assessment(
@@ -160,6 +173,16 @@ def submit_assessment(
     db.refresh(assessment)
     return AssessmentResponse.model_validate(assessment)
 
+
+@legacy_router.post("/submit", response_model=AssessmentResponse)
+def legacy_submit_assessment(
+    req: AssessmentSubmitRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    assessment_id: int | None = None
+):
+    return submit_assessment(req, current_user, db, assessment_id)
+
 @router.get("/{assessment_id}", response_model=AssessmentResponse)
 def get_assessment(
     assessment_id: int,
@@ -170,3 +193,12 @@ def get_assessment(
     if not assessment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assessment not found")
     return AssessmentResponse.model_validate(assessment)
+
+
+@legacy_router.get("/{assessment_id}", response_model=AssessmentResponse)
+def legacy_get_assessment(
+    assessment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return get_assessment(assessment_id, current_user, db)

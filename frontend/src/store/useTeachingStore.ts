@@ -199,9 +199,10 @@ export const useTeachingStore = create<TeachingState>((set, get) => ({
   },
 
   submitAnswer: async (questionId: number, answer: string): Promise<EvaluationResult> => {
+    const { lesson } = get();
     set({ isEvaluating: true });
     try {
-      const evaluation = await teachingApi.submitAnswer(questionId, answer);
+      const evaluation = await teachingApi.submitAnswer(lesson?.id || 1, questionId, answer);
       set({ lastEvaluation: evaluation, isEvaluating: false });
 
       if (evaluation.is_correct) {
