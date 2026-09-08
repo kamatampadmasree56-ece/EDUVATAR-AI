@@ -24,9 +24,9 @@ def get_dashboard_analytics(
     # Get assessments for score calculation
     assessments = db.query(Assessment).filter(Assessment.user_id == current_user.id).all()
     if assessments:
-        avg_score = round(sum(a.total_score for a in assessments) / len(assessments), 1)
+        avg_mastery = round(sum(a.total_score for a in assessments) / len(assessments), 1)
     else:
-        avg_score = 82.5
+        avg_mastery = 82.5
 
     # Masteries
     masteries = db.query(ConceptMastery).filter(ConceptMastery.user_id == current_user.id).all()
@@ -40,6 +40,13 @@ def get_dashboard_analytics(
         ]
         strong = ["Electric Voltage", "Electric Current"]
         weak = ["Resistance & Ohm's Law"]
+        concept_radar = [
+            {"concept": "Ohm's Law", "mastery": 88, "subject": "Physics"},
+            {"concept": "PCB Layout", "mastery": 72, "subject": "PCB Design"},
+            {"concept": "MATLAB DSP", "mastery": 65, "subject": "MATLAB"},
+            {"concept": "Op-Amps", "mastery": 60, "subject": "Circuits"},
+            {"concept": "Digital FSMs", "mastery": 55, "subject": "DCD"},
+        ]
     else:
         sample_masteries = [
             ConceptMasteryItem(
@@ -51,11 +58,15 @@ def get_dashboard_analytics(
         ]
         strong = [m.concept_name for m in masteries if m.mastery_percentage >= 80.0]
         weak = [m.concept_name for m in masteries if m.mastery_percentage < 70.0]
+        concept_radar = [
+            {"concept": m.concept_name, "mastery": m.mastery_percentage, "subject": m.subject}
+            for m in masteries[:6]
+        ]
 
-    recent_act = [
-        {"id": 1, "activity": "Completed Lesson: Mastering Ohm's Law", "time": "2 hours ago", "type": "lesson"},
-        {"id": 2, "activity": "Passed Checkpoint: V=IR Inverse Relationship", "time": "Yesterday", "type": "checkpoint"},
-        {"id": 3, "activity": "Reviewed Remedial Analogy: Water Pipe Resistance", "time": "2 days ago", "type": "remediation"},
+    recent_activity = [
+        {"action": "Completed Lesson", "topic": "Mastering Ohm's Law", "time": "2 hours ago", "badge": "+20% Mastery"},
+        {"action": "Quiz Evaluated", "topic": "V=IR Inverse Relationship", "time": "Yesterday", "badge": "Score 90%"},
+        {"action": "AI Doubt Resolved", "topic": "Water Pipe Resistance Analogy", "time": "2 days ago", "badge": "Analogy Applied"},
     ]
 
     recommendations = [
@@ -65,13 +76,14 @@ def get_dashboard_analytics(
     ]
 
     return AnalyticsDashboardResponse(
-        study_streak_days=streak,
-        total_study_minutes=minutes,
-        completed_lessons_count=completed_lessons,
-        average_score=avg_score,
+        streak_days=streak,
+        total_minutes=minutes,
+        completed_lessons=completed_lessons,
+        average_mastery=avg_mastery,
         strong_concepts=strong or ["Voltage Fundamentals"],
         weak_concepts=weak or ["Ohm's Law Calculation"],
+        concept_radar=concept_radar,
+        recent_activity=recent_activity,
         concept_mastery_list=sample_masteries,
-        recent_activity=recent_act,
         recommended_topics=recommendations
     )

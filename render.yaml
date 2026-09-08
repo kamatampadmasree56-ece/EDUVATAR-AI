@@ -16,6 +16,18 @@ services:
         generateValue: true
       - key: LLM_PROVIDER
         value: demo
+      - key: EMBEDDING_PROVIDER
+        value: demo
+      - key: AVATAR_PROVIDER
+        value: canvas
+      - key: TTS_PROVIDER
+        value: browser
+      - key: STT_PROVIDER
+        value: browser
       - key: CORS_ORIGINS
         value: "*"
-
+      # ↓ Set these in Render dashboard for production AI
+      # - key: LLM_API_KEY
+      #   value: your-gemini-or-openai-key
+      # - key: EMBEDDING_API_KEY
+      #   value: your-embedding-api-key

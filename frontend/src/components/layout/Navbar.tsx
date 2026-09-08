@@ -162,7 +162,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuthModal }) => {
           {/* User Auth or Profile */}
           {user ? (
             <div className="flex items-center gap-2 pl-2 border-l border-purple-100">
-              <span className="text-xs font-bold text-slate-800 hidden sm:inline">{user.full_name}</span>
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-purple-50 transition-colors group"
+                title="My Profile"
+              >
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white text-[11px] font-black shadow-sm">
+                  {user.full_name?.charAt(0).toUpperCase() || 'S'}
+                </div>
+                <span className="text-xs font-bold text-slate-800 hidden sm:inline group-hover:text-purple-800 transition-colors">
+                  {user.full_name?.split(' ')[0]}
+                </span>
+              </button>
               <button
                 onClick={() => logout()}
                 className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"

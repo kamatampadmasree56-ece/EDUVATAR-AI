@@ -9,6 +9,7 @@ import { AssessmentPage } from './pages/AssessmentPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { DocumentsPage } from './pages/DocumentsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { AuthModal } from './pages/AuthModal';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -35,6 +36,7 @@ export const App: React.FC = () => {
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/documents" element={<DocumentsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

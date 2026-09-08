@@ -95,6 +95,22 @@ export const authApi = {
     return request<User>('/auth/me');
   },
 
+  async updateProfile(data: {
+    education_level?: string;
+    subject_interests?: string[];
+    current_knowledge?: string;
+    learning_goal?: string;
+    preferred_language?: string;
+    teaching_style?: string;
+    available_daily_time?: number;
+    difficulty_preference?: string;
+  }): Promise<User['profile']> {
+    return request('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
   logout() {
     localStorage.removeItem('eduvatar_token');
   }

@@ -69,9 +69,15 @@ def test_analytics_dashboard(client, auth_headers):
     res = client.get("/api/analytics/dashboard", headers=auth_headers)
     assert res.status_code == 200
     data = res.json()
-    assert "study_streak_days" in data
-    assert "total_study_minutes" in data
-    assert "average_score" in data
+    # Frontend-aligned field names
+    assert "streak_days" in data
+    assert "total_minutes" in data
+    assert "average_mastery" in data
+    assert "strong_concepts" in data
+    assert "weak_concepts" in data
+    assert "concept_radar" in data
+    assert "recent_activity" in data
+    # Extended backend fields
     assert "concept_mastery_list" in data
     assert len(data["concept_mastery_list"]) > 0
     assert "recommended_topics" in data

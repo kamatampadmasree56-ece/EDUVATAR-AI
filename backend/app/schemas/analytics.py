@@ -8,15 +8,18 @@ class ConceptMasteryItem(BaseModel):
     attempts: int
 
 class AnalyticsDashboardResponse(BaseModel):
-    study_streak_days: int
-    total_study_minutes: int
-    completed_lessons_count: int
-    average_score: float
+    # Fields aligned with the frontend StudyAnalytics type
+    streak_days: int
+    total_minutes: int
+    completed_lessons: int
+    average_mastery: float
     strong_concepts: List[str]
     weak_concepts: List[str]
-    concept_mastery_list: List[ConceptMasteryItem]
+    concept_radar: List[Dict[str, Any]]
     recent_activity: List[Dict[str, Any]]
-    recommended_topics: List[Dict[str, str]]
+    # Extended backend-only fields
+    concept_mastery_list: List[ConceptMasteryItem] = []
+    recommended_topics: List[Dict[str, str]] = []
 
 class LearningPathNode(BaseModel):
     id: str
