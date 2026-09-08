@@ -8,201 +8,205 @@ import {
   Sparkles,
   ArrowRight,
   Zap,
-  BookOpen
+  BookOpen,
+  Layers,
+  Cpu,
 } from 'lucide-react';
-import { learningPathApi } from '../services/api';
+import { useTeachingStore } from '../store/useTeachingStore';
+import { demoApi } from '../services/api';
 import { LearningPath, RoadmapNode } from '../types';
 
 export const RoadmapPage: React.FC = () => {
   const navigate = useNavigate();
-  const [roadmap, setRoadmap] = useState<LearningPath | null>(null);
+  const { setLesson } = useTeachingStore();
+
   const [selectedNode, setSelectedNode] = useState<RoadmapNode | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const mockRoadmap: LearningPath = {
+    id: 1,
+    subject: 'ECE & Circuit Engineering',
+    title: 'Mastery Tree: From Fundamentals to High-Speed FPGA Systems',
+    overall_progress: 72.0,
+    nodes: [
+      {
+        id: 'node-1',
+        title: 'Circuit Fundamentals & Ohm\'s Law',
+        subject: 'Analog & Digital',
+        description: 'Master Voltage, Current, and Resistance (V=IR) using intuitive physical models.',
+        prerequisites: [],
+        difficulty: 'Basic',
+        estimated_minutes: 15,
+        mastery_level: 98.0,
+        is_unlocked: true,
+        is_completed: true,
+      },
+      {
+        id: 'node-2',
+        title: 'PCB 4-Layer Stackup & Decoupling',
+        subject: 'PCB Design',
+        description: 'Learn return current loops, ground plane placement, and IC decoupling capacitor rules.',
+        prerequisites: ['node-1'],
+        difficulty: 'Advance',
+        estimated_minutes: 25,
+        mastery_level: 88.0,
+        is_unlocked: true,
+        is_completed: true,
+      },
+      {
+        id: 'node-3',
+        title: 'MATLAB Matrix Math & Signal FFT',
+        subject: 'MATLAB',
+        description: 'Vectorized computing, time-to-frequency conversions, and digital filter design.',
+        prerequisites: ['node-2'],
+        difficulty: 'Advance',
+        estimated_minutes: 25,
+        mastery_level: 65.0,
+        is_unlocked: true,
+        is_completed: false,
+      },
+      {
+        id: 'node-4',
+        title: 'Op-Amps & MOSFET Small-Signal Biasing',
+        subject: 'Analog & Digital',
+        description: 'Inverting/Non-inverting gains, transconductance, and active RC filtering.',
+        prerequisites: ['node-3'],
+        difficulty: 'Advance',
+        estimated_minutes: 30,
+        mastery_level: 40.0,
+        is_unlocked: true,
+        is_completed: false,
+      },
+      {
+        id: 'node-5',
+        title: 'DCD: Mealy & Moore FSM State Synthesis',
+        subject: 'DCD',
+        description: 'K-Map minimization, next-state logic, and Verilog non-blocking assignments.',
+        prerequisites: ['node-4'],
+        difficulty: 'High Level',
+        estimated_minutes: 30,
+        mastery_level: 15.0,
+        is_unlocked: true,
+        is_completed: false,
+      },
+      {
+        id: 'node-6',
+        title: 'High-Speed Differential Pairs & FPGA STA',
+        subject: 'Mastery',
+        description: 'Impedance matching (90Ω USB/100Ω PCIe), Static Timing Analysis, and clock domain crossing.',
+        prerequisites: ['node-5'],
+        difficulty: 'High Level',
+        estimated_minutes: 35,
+        mastery_level: 0.0,
+        is_unlocked: false,
+        is_completed: false,
+      },
+    ],
+    edges: [
+      { from: 'node-1', to: 'node-2' },
+      { from: 'node-2', to: 'node-3' },
+      { from: 'node-3', to: 'node-4' },
+      { from: 'node-4', to: 'node-5' },
+      { from: 'node-5', to: 'node-6' },
+    ],
+  };
 
   useEffect(() => {
-    learningPathApi
-      .getSubjectPath('Physics')
-      .then((data) => {
-        setRoadmap(data);
-        if (data.nodes.length > 0) {
-          setSelectedNode(data.nodes[1] || data.nodes[0]);
-        }
-        setIsLoading(false);
-      })
-      .catch(() => {
-        // Fallback roadmap for offline presentation
-        const mockRoadmap: LearningPath = {
-          id: 1,
-          subject: "Physics & Electrical Circuits",
-          title: "Mastery Tree: From Charge to Complex Networks",
-          overall_progress: 65.0,
-          nodes: [
-            {
-              id: "node-1",
-              title: "Electric Charge & Electrostatics",
-              subject: "Physics",
-              description: "Coulomb's law, electric fields, and potential difference (Voltage) fundamentals.",
-              prerequisites: [],
-              difficulty: "Beginner",
-              estimated_minutes: 15,
-              mastery_level: 95.0,
-              is_unlocked: true,
-              is_completed: true,
-            },
-            {
-              id: "node-2",
-              title: "Ohm's Law & Circuit Dynamics",
-              subject: "Physics",
-              description: "The fundamental triad: Voltage (V), Current (I), and Resistance (R).",
-              prerequisites: ["node-1"],
-              difficulty: "Beginner",
-              estimated_minutes: 20,
-              mastery_level: 85.0,
-              is_unlocked: true,
-              is_completed: true,
-            },
-            {
-              id: "node-3",
-              title: "Series & Parallel Resistor Networks",
-              subject: "Physics",
-              description: "Equivalent resistance, voltage dividers, and current branching laws.",
-              prerequisites: ["node-2"],
-              difficulty: "Intermediate",
-              estimated_minutes: 25,
-              mastery_level: 55.0,
-              is_unlocked: true,
-              is_completed: false,
-            },
-            {
-              id: "node-4",
-              title: "Kirchhoff's Laws (KCL & KVL)",
-              subject: "Physics",
-              description: "Conservation of charge and energy applied to complex multi-loop circuit topologies.",
-              prerequisites: ["node-3"],
-              difficulty: "Advanced",
-              estimated_minutes: 30,
-              mastery_level: 20.0,
-              is_unlocked: false,
-              is_completed: false,
-            },
-            {
-              id: "node-5",
-              title: "Capacitance & RC Transient Dynamics",
-              subject: "Physics",
-              description: "Dielectrics, charge storage, time constants (tau = RC), and exponential charging curves.",
-              prerequisites: ["node-4"],
-              difficulty: "Advanced",
-              estimated_minutes: 35,
-              mastery_level: 0.0,
-              is_unlocked: false,
-              is_completed: false,
-            },
-          ],
-          edges: [
-            { from: "node-1", to: "node-2" },
-            { from: "node-2", to: "node-3" },
-            { from: "node-3", to: "node-4" },
-            { from: "node-4", to: "node-5" },
-          ],
-        };
-        setRoadmap(mockRoadmap);
-        setSelectedNode(mockRoadmap.nodes[1]);
-        setIsLoading(false);
-      });
+    setSelectedNode(mockRoadmap.nodes[1]);
   }, []);
 
-  if (isLoading || !roadmap) {
-    return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
-        <div className="w-10 h-10 rounded-full border-4 border-brand-500 border-t-transparent animate-spin" />
-        <p className="text-xs text-slate-400">Loading interactive learning roadmap...</p>
-      </div>
-    );
-  }
+  const handleLaunchNode = async (node: RoadmapNode) => {
+    try {
+      const lesson = await demoApi.startCourse('pcb-design');
+      setLesson(lesson);
+      navigate('/teach');
+    } catch {
+      navigate('/teach');
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-8">
       {/* Header */}
-      <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-xs font-semibold uppercase tracking-wider">
-          <Compass size={13} className="text-cyan-400" />
-          <span>Curriculum Skill Tree</span>
+      <div className="rounded-3xl p-6 bg-white border border-purple-100 shadow-purple-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-900 text-xs font-bold">
+            <Compass size={14} className="text-purple-600" />
+            <span>Interactive Engineering Knowledge Tree</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-950">
+            {mockRoadmap.title}
+          </h1>
+          <p className="text-xs text-slate-600 font-medium">
+            Progressive dependency tree covering PCB Design, MATLAB, Analog/Digital Circuits, and DCD across all 3 stages.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-display font-black text-white">
-          {roadmap.title}
-        </h1>
-        <p className="text-xs text-slate-400">
-          Visual prerequisite roadmap. Master foundational concepts before unlocking advanced circuit theorems.
-        </p>
+
+        <div className="text-right">
+          <div className="text-2xl font-display font-black text-purple-700">
+            {mockRoadmap.overall_progress}%
+          </div>
+          <p className="text-[11px] font-bold text-slate-500 uppercase">Tree Mastery</p>
+        </div>
       </div>
 
+      {/* Nodes Map & Detail View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Visual Roadmap Tree Nodes (7 cols) */}
-        <div className="lg:col-span-7 p-6 rounded-3xl glass-panel border border-slate-800 space-y-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              Roadmap Progress: {Math.round(roadmap.overall_progress)}%
-            </span>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" /> Mastered
-              </span>
-              <span className="flex items-center gap-1 text-cyan-400">
-                <span className="w-2 h-2 rounded-full bg-cyan-400" /> Active
-              </span>
-              <span className="flex items-center gap-1 text-slate-500">
-                <span className="w-2 h-2 rounded-full bg-slate-600" /> Locked
-              </span>
-            </div>
-          </div>
+        {/* Nodes Timeline (7 cols) */}
+        <div className="lg:col-span-7 purple-white-card p-6 bg-white border-purple-200 space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 pb-2 border-b border-purple-100">
+            Sequential Learning Trajectory
+          </h3>
 
-          <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-800">
-            {roadmap.nodes.map((node, idx) => {
+          <div className="space-y-3 relative">
+            {mockRoadmap.nodes.map((node, idx) => {
               const isSelected = selectedNode?.id === node.id;
               return (
                 <div
                   key={node.id}
                   onClick={() => setSelectedNode(node)}
-                  className={`relative p-4 rounded-2xl border transition-all cursor-pointer ${
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                     isSelected
-                      ? 'bg-brand-500/15 border-brand-400 shadow-lg shadow-brand-500/15'
+                      ? 'bg-purple-100 border-purple-600 shadow-purple-sm'
                       : node.is_completed
-                      ? 'bg-slate-900/60 border-emerald-500/30 hover:border-emerald-500/60'
+                      ? 'bg-purple-50/50 border-purple-200 hover:bg-purple-50'
                       : node.is_unlocked
-                      ? 'bg-slate-900/80 border-cyan-500/40 hover:border-cyan-400'
-                      : 'bg-slate-950/40 border-slate-800/80 opacity-60 hover:opacity-80'
+                      ? 'bg-white border-slate-200 hover:border-purple-300'
+                      : 'bg-slate-50 border-slate-200 opacity-60'
                   }`}
                 >
-                  {/* Node Icon on spine */}
-                  <div
-                    className={`absolute -left-9 top-4 w-6 h-6 rounded-full flex items-center justify-center border text-[11px] font-bold ${
-                      node.is_completed
-                        ? 'bg-emerald-500 border-emerald-400 text-white'
-                        : node.is_unlocked
-                        ? 'bg-cyan-500 border-cyan-400 text-white animate-pulse'
-                        : 'bg-slate-800 border-slate-700 text-slate-500'
-                    }`}
-                  >
-                    {node.is_completed ? '✓' : node.is_unlocked ? '●' : <Lock size={10} />}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                        node.is_completed
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : node.is_unlocked
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {node.is_completed ? (
+                        <CheckCircle2 size={18} />
+                      ) : node.is_unlocked ? (
+                        <span>{idx + 1}</span>
+                      ) : (
+                        <Lock size={16} />
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-950">
+                        {node.title}
+                      </h4>
+                      <p className="text-[11px] font-semibold text-purple-700">
+                        {node.subject} • {node.difficulty} Stage
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-white">{node.title}</h4>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                          {node.difficulty}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 line-clamp-1">{node.description}</p>
-                    </div>
-
-                    <div className="text-right shrink-0 pl-2">
-                      <span className="text-xs font-mono font-bold text-cyan-400 block">
-                        {Math.round(node.mastery_level)}%
-                      </span>
-                      <span className="text-[10px] text-slate-500">{node.estimated_minutes} mins</span>
-                    </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-xs font-mono font-bold text-slate-700">
+                      {node.mastery_level}%
+                    </span>
                   </div>
                 </div>
               );
@@ -210,58 +214,37 @@ export const RoadmapPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Selected Node Details Card (5 cols) */}
-        <div className="lg:col-span-5 p-6 rounded-3xl glass-panel border border-slate-800 space-y-4 sticky top-24">
-          {selectedNode ? (
-            <>
+        {/* Selected Node Details (5 cols) */}
+        <div className="lg:col-span-5">
+          {selectedNode && (
+            <div className="purple-white-card p-6 bg-white border-purple-200 space-y-5">
               <div className="space-y-1">
-                <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider font-semibold">
-                  {selectedNode.subject} • {selectedNode.difficulty}
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800 uppercase">
+                  {selectedNode.difficulty} Stage
                 </span>
-                <h3 className="text-lg font-bold text-white">{selectedNode.title}</h3>
-                <p className="text-xs text-slate-300 leading-relaxed mt-2">
-                  {selectedNode.description}
-                </p>
+                <h3 className="text-lg font-bold text-slate-950 mt-2">
+                  {selectedNode.title}
+                </h3>
+                <p className="text-xs font-semibold text-purple-700">{selectedNode.subject}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase block">Estimated Time</span>
-                  <span className="text-sm font-bold font-mono text-white">
-                    {selectedNode.estimated_minutes} Minutes
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase block">Current Mastery</span>
-                  <span className="text-sm font-bold font-mono text-emerald-400">
-                    {Math.round(selectedNode.mastery_level)}%
-                  </span>
-                </div>
-              </div>
+              <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                {selectedNode.description}
+              </p>
 
-              {selectedNode.prerequisites.length > 0 && (
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
-                  <span className="text-slate-400 block mb-1">Prerequisites:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedNode.prerequisites.map((p, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded text-[11px] font-mono">
-                        {p}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 space-y-1 text-xs text-slate-800">
+                <p className="font-bold text-purple-900">Stage Target Objective:</p>
+                <p>Master practical application and pass diagnostic checkpoint with 80%+ score.</p>
+              </div>
 
               <button
-                onClick={() => navigate('/teach')}
-                className="w-full mt-4 py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 via-brand-500 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white text-xs font-bold shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                onClick={() => handleLaunchNode(selectedNode)}
+                className="w-full purple-gradient-btn py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-purple-md"
               >
-                <Play size={14} className="fill-white" />
-                <span>Launch Interactive Lesson</span>
+                <Play size={14} fill="currentColor" />
+                <span>Start Interactive Lesson</span>
               </button>
-            </>
-          ) : (
-            <p className="text-xs text-slate-400 text-center py-10">Select a roadmap node to view curriculum details.</p>
+            </div>
           )}
         </div>
       </div>

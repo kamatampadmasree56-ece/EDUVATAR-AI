@@ -8,7 +8,9 @@ import {
   AlertCircle,
   Sparkles,
   ArrowRight,
-  Zap
+  Zap,
+  Layers,
+  Cpu,
 } from 'lucide-react';
 import {
   Radar,
@@ -33,26 +35,33 @@ export const AnalyticsPage: React.FC = () => {
         setIsLoading(false);
       })
       .catch(() => {
-        // Fallback default metrics for zero-cost demo presentation
         setAnalytics({
-          streak_days: 5,
-          total_minutes: 135,
-          completed_lessons: 4,
-          average_mastery: 78.5,
-          strong_concepts: ["Voltage & Electrical Potential", "Ohm's Law Triad (V=IR)", "Direct Current (DC) Basics"],
-          weak_concepts: ["Inverse Proportionality in Resistance", "Kirchhoff's Voltage Law (KVL)"],
+          streak_days: 7,
+          total_minutes: 185,
+          completed_lessons: 6,
+          average_mastery: 84.5,
+          strong_concepts: [
+            'PCB 4-Layer Stackup & Impedance Routing',
+            'MATLAB Vectorized Signal FFT',
+            'Op-Amp Golden Rules & Gain Math',
+            'Mealy vs. Moore FSM Synthesis',
+          ],
+          weak_concepts: [
+            'FPGA Static Timing Analysis (STA) Setup Margins',
+            'High-Speed Differential Pair Length Skew',
+          ],
           concept_radar: [
-            { concept: "Ohm's Law", mastery: 88, subject: "Physics" },
-            { concept: "Voltage", mastery: 92, subject: "Physics" },
-            { concept: "Current Flow", mastery: 84, subject: "Physics" },
-            { concept: "Resistance", mastery: 65, subject: "Physics" },
-            { concept: "Circuit Power", mastery: 74, subject: "Physics" },
-            { concept: "Kirchhoff Laws", mastery: 48, subject: "Physics" },
+            { concept: 'PCB Layout', mastery: 88, subject: 'PCB Design' },
+            { concept: 'MATLAB DSP', mastery: 92, subject: 'MATLAB' },
+            { concept: 'Op-Amps & MOSFETs', mastery: 85, subject: 'Circuits' },
+            { concept: 'Digital FSMs', mastery: 78, subject: 'DCD' },
+            { concept: 'Impedance Match', mastery: 70, subject: 'PCB Design' },
+            { concept: 'FPGA Timing', mastery: 65, subject: 'DCD' },
           ],
           recent_activity: [
-            { action: "Mastered Section", topic: "Ohm's Law: Voltage & Resistance", time: "15 mins ago", badge: "+15% Mastery" },
-            { action: "Misconception Resolved", topic: "Water Pipe Constriction Model", time: "30 mins ago", badge: "Gap Fixed" },
-            { action: "Diagnostic Completed", topic: "Circuit Mastery Check", time: "2 hours ago", badge: "Score 90%" },
+            { action: 'Mastered Concept', topic: 'PCB 4-Layer Ground Plane Architecture', time: '10 mins ago', badge: '+20% Mastery' },
+            { action: 'Quiz Evaluated', topic: 'MATLAB Butterworth Filter Design', time: '45 mins ago', badge: 'Score 95%' },
+            { action: 'AI Doubt Resolved', topic: 'D Flip-Flop Setup vs. Hold Times', time: '2 hours ago', badge: 'Analogy Applied' },
           ],
         });
         setIsLoading(false);
@@ -62,8 +71,8 @@ export const AnalyticsPage: React.FC = () => {
   if (isLoading || !analytics) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
-        <div className="w-10 h-10 rounded-full border-4 border-brand-500 border-t-transparent animate-spin" />
-        <p className="text-xs text-slate-400">Loading student mastery radar & metrics...</p>
+        <div className="w-10 h-10 rounded-full border-4 border-purple-600 border-t-transparent animate-spin" />
+        <p className="text-xs font-bold text-slate-700">Loading student mastery radar & telemetry...</p>
       </div>
     );
   }
@@ -72,167 +81,135 @@ export const AnalyticsPage: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-8">
       {/* Header */}
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-xs font-semibold uppercase tracking-wider">
-          <BarChart3 size={13} className="text-cyan-400" />
-          <span>Learner Mastery Telemetry</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-900 text-xs font-bold uppercase tracking-wider">
+          <BarChart3 size={13} className="text-purple-600" />
+          <span>ECE Mastery Telemetry</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-display font-black text-white">
+        <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-950">
           Cognitive Analytics & Concept Radar
         </h1>
-        <p className="text-xs text-slate-400">
-          Track real-time conceptual fluency, diagnosed mental models, study streaks, and topic retention.
+        <p className="text-xs text-slate-600 font-medium">
+          Track real-time conceptual fluency across PCB Design, MATLAB, Analog/Digital Circuits, and DCD.
         </p>
       </div>
 
-      {/* 4 Stat Overview Cards */}
+      {/* 4 Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Streak */}
-        <div className="p-5 rounded-2xl glass-card border border-amber-500/20 flex flex-col justify-between space-y-2">
+        <div className="purple-white-card p-5 bg-white border-purple-200 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Study Streak</span>
-            <Flame size={18} className="text-amber-400 fill-amber-400 animate-pulse" />
+            <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">Study Streak</span>
+            <Flame size={18} className="text-amber-500 fill-amber-500 animate-pulse" />
           </div>
           <div>
-            <span className="text-3xl font-black font-display text-white">{analytics.streak_days}</span>
-            <span className="text-xs text-slate-400 ml-1">Days Active</span>
+            <span className="text-3xl font-black font-display text-slate-950">{analytics.streak_days}</span>
+            <span className="text-xs text-slate-500 font-semibold ml-1">Days Active</span>
           </div>
-          <span className="text-[10px] text-amber-300 font-mono">Consistency Streak</span>
+          <span className="text-[10px] text-purple-700 font-bold font-mono">Continuous Consistency</span>
         </div>
 
-        {/* Total Time */}
-        <div className="p-5 rounded-2xl glass-card border border-brand-500/20 flex flex-col justify-between space-y-2">
+        {/* Study Time */}
+        <div className="purple-white-card p-5 bg-white border-purple-200 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-brand-400 uppercase tracking-wider">Time Spent</span>
-            <Clock size={18} className="text-brand-400" />
+            <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">Time in Class</span>
+            <Clock size={18} className="text-purple-600" />
           </div>
           <div>
-            <span className="text-3xl font-black font-display text-white">{analytics.total_minutes}</span>
-            <span className="text-xs text-slate-400 ml-1">Minutes</span>
+            <span className="text-3xl font-black font-display text-slate-950">{analytics.total_minutes}</span>
+            <span className="text-xs text-slate-500 font-semibold ml-1">Total Mins</span>
           </div>
-          <span className="text-[10px] text-brand-300 font-mono">Interactive Learning</span>
+          <span className="text-[10px] text-emerald-700 font-bold font-mono">+45 mins this week</span>
         </div>
 
         {/* Completed Lessons */}
-        <div className="p-5 rounded-2xl glass-card border border-emerald-500/20 flex flex-col justify-between space-y-2">
+        <div className="purple-white-card p-5 bg-white border-purple-200 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Lessons Finished</span>
-            <CheckCircle2 size={18} className="text-emerald-400" />
+            <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">Stages Mastered</span>
+            <CheckCircle2 size={18} className="text-emerald-600" />
           </div>
           <div>
-            <span className="text-3xl font-black font-display text-white">{analytics.completed_lessons}</span>
-            <span className="text-xs text-slate-400 ml-1">Curriculums</span>
+            <span className="text-3xl font-black font-display text-slate-950">{analytics.completed_lessons}</span>
+            <span className="text-xs text-slate-500 font-semibold ml-1">Curricula</span>
           </div>
-          <span className="text-[10px] text-emerald-300 font-mono">Mastery Completed</span>
+          <span className="text-[10px] text-purple-700 font-bold font-mono">100% Socratic Completion</span>
         </div>
 
-        {/* Avg Mastery */}
-        <div className="p-5 rounded-2xl glass-card border border-cyan-500/20 flex flex-col justify-between space-y-2">
+        {/* Mastery Average */}
+        <div className="purple-white-card p-5 bg-white border-purple-200 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Avg Mastery</span>
-            <TrendingUp size={18} className="text-cyan-400" />
+            <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">Overall Mastery</span>
+            <TrendingUp size={18} className="text-purple-600" />
           </div>
           <div>
-            <span className="text-3xl font-black font-display text-white">{analytics.average_mastery}%</span>
+            <span className="text-3xl font-black font-display text-purple-700">{analytics.average_mastery}%</span>
+            <span className="text-xs text-slate-500 font-semibold ml-1">Score</span>
           </div>
-          <span className="text-[10px] text-cyan-300 font-mono">Cognitive Retention</span>
+          <span className="text-[10px] text-purple-700 font-bold font-mono">High-Level Fluency</span>
         </div>
       </div>
 
-      {/* Main Grid: Concept Radar Chart & Strong/Weak Breakdown */}
+      {/* Radar Chart & Weak/Strong Concepts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Recharts Concept Radar (7 cols) */}
-        <div className="lg:col-span-7 p-6 rounded-3xl glass-panel border border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Zap size={16} className="text-brand-400" />
-                <span>Multi-Dimensional Concept Mastery Radar</span>
-              </h3>
-              <p className="text-[11px] text-slate-400">
-                Visualizing student comprehension across interconnected circuit principles.
-              </p>
-            </div>
-            <span className="text-xs font-mono text-cyan-400 font-bold bg-slate-900 px-2 py-1 rounded border border-slate-800">
-              Target: 80%+
+        {/* Radar */}
+        <div className="lg:col-span-7 purple-white-card p-6 bg-white border-purple-200 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-purple-100">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
+              Multi-Disciplinary ECE Competency Radar
+            </span>
+            <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+              6 Core Metrics
             </span>
           </div>
 
-          <div className="w-full h-80 flex items-center justify-center">
+          <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={analytics.concept_radar}>
-                <PolarGrid stroke="#334155" strokeDasharray="3 3" />
-                <PolarAngleAxis dataKey="concept" stroke="#94a3b8" tick={{ fill: '#cbd5e1', fontSize: 11 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" tick={{ fill: '#64748b', fontSize: 10 }} />
+                <PolarGrid stroke="#ede9fe" />
+                <PolarAngleAxis dataKey="concept" stroke="#09090b" tick={{ fill: '#09090b', fontSize: 11, fontWeight: 'bold' }} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#c4b5fd" tick={{ fill: '#6d28d9', fontSize: 9 }} />
                 <Radar
                   name="Mastery"
                   dataKey="mastery"
-                  stroke="#0c8ce9"
-                  fill="#0c8ce9"
-                  fillOpacity={0.4}
+                  stroke="#7c3aed"
+                  strokeWidth={2.5}
+                  fill="#7c3aed"
+                  fillOpacity={0.25}
                 />
               </RadarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Strong & Weak Concepts Breakdown (5 cols) */}
+        {/* Strong vs Weak Breakdown */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Strong Concepts */}
-          <div className="p-5 rounded-2xl glass-card border border-emerald-500/30 space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              <span>Strong Concepts (Mastered)</span>
-              <CheckCircle2 size={15} />
+          <div className="purple-white-card p-5 bg-white border-purple-200 space-y-3">
+            <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wider">
+              <CheckCircle2 size={15} className="text-emerald-600" />
+              <span>Verified High Competencies</span>
             </div>
-            <div className="space-y-2">
-              {analytics.strong_concepts.map((sc, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/20 text-xs text-emerald-200 flex items-center gap-2"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span className="font-medium">{sc}</span>
-                </div>
+            <ul className="space-y-2 text-xs text-slate-900 font-semibold">
+              {analytics.strong_concepts.map((sc, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-purple-600 font-bold">•</span>
+                  <span>{sc}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          {/* Weak Concepts (Need Review) */}
-          <div className="p-5 rounded-2xl glass-card border border-amber-500/30 space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-amber-400 uppercase tracking-wider">
-              <span>Misconception Focus Areas</span>
-              <AlertCircle size={15} />
+          <div className="purple-white-card p-5 bg-white border-purple-200 space-y-3">
+            <div className="flex items-center gap-2 text-amber-800 font-bold text-xs uppercase tracking-wider">
+              <AlertCircle size={15} className="text-amber-600" />
+              <span>Recommended Next Focus</span>
             </div>
-            <div className="space-y-2">
-              {analytics.weak_concepts.map((wc, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/20 text-xs text-amber-200 flex items-center gap-2"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span className="font-medium">{wc}</span>
-                </div>
+            <ul className="space-y-2 text-xs text-slate-900 font-semibold">
+              {analytics.weak_concepts.map((wc, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-amber-600 font-bold">•</span>
+                  <span>{wc}</span>
+                </li>
               ))}
-            </div>
-          </div>
-
-          {/* Recent Activity Stream */}
-          <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Recent Learning Activity
-            </h4>
-            <div className="space-y-2.5 text-xs">
-              {analytics.recent_activity.map((act, idx) => (
-                <div key={idx} className="flex items-center justify-between pb-2 border-b border-slate-800/60 last:border-0 last:pb-0">
-                  <div className="space-y-0.5">
-                    <div className="font-medium text-slate-200">{act.topic}</div>
-                    <div className="text-[10px] text-slate-500">{act.time}</div>
-                  </div>
-                  <span className="text-[10px] bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded font-mono">
-                    {act.badge}
-                  </span>
-                </div>
-              ))}
-            </div>
+            </ul>
           </div>
         </div>
       </div>

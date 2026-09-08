@@ -2,7 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, Mic, Sparkles, Bot, User, Lightbulb } from 'lucide-react';
 import { useTeachingStore } from '../../store/useTeachingStore';
 
-export const TeacherDoubtChat: React.FC = () => {
+interface TeacherDoubtChatProps {
+  lessonId?: number;
+  currentSectionIndex?: number;
+}
+
+export const TeacherDoubtChat: React.FC<TeacherDoubtChatProps> = () => {
   const {
     chatMessages,
     askDoubt,
@@ -42,112 +47,121 @@ export const TeacherDoubtChat: React.FC = () => {
   };
 
   const quickPrompts = [
-    "Why does current decrease when resistance increases?",
-    "Can you give me another analogy for Voltage?",
-    "What happens if resistance drops to zero?",
+    'Can you give me a simple real-world analogy for this concept?',
+    'What are the most common beginner mistakes in this topic?',
+    'How is this verified in real-world industry applications?',
   ];
 
   return (
-    <div className="flex flex-col h-full rounded-2xl glass-panel border border-slate-700/50 overflow-hidden">
+    <div className="flex flex-col h-full bg-white rounded-xl overflow-hidden text-slate-900">
       {/* Header */}
-      <div className="p-3 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-3 bg-purple-50/70 border-b border-purple-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-brand-400" />
-          <span className="text-xs font-semibold text-slate-200">Interactive Doubt & Clarification Dock</span>
+          <MessageSquare size={16} className="text-purple-600" />
+          <span className="text-xs font-bold text-slate-900">
+            Ask AI Teacher (Voice & Chat)
+          </span>
         </div>
-        <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">
-          Live Teacher Q&A
+        <span className="text-[10px] text-purple-800 bg-purple-100 px-2 py-0.5 rounded font-mono font-bold">
+          Socratic AI Educator
         </span>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-3.5 space-y-3 overflow-y-auto max-h-[360px]">
-        {chatMessages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            {msg.role === 'teacher' && (
-              <div className="w-6 h-6 rounded-full bg-brand-500/20 border border-brand-400/40 flex items-center justify-center shrink-0 mt-0.5">
-                <Bot size={13} className="text-brand-300" />
-              </div>
-            )}
-
+      <div className="flex-1 p-3.5 space-y-3 overflow-y-auto max-h-[340px]">
+        {chatMessages.length === 0 ? (
+          <div className="py-8 text-center space-y-2">
+            <Bot size={24} className="text-purple-600 mx-auto" />
+            <p className="text-xs font-bold text-slate-800">
+              Have a question about this section?
+            </p>
+            <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+              Ask any doubt via voice microphone or text. Your AI teacher will answer with plain English analogies!
+            </p>
+          </div>
+        ) : (
+          chatMessages.map((msg) => (
             <div
-              className={`max-w-[85%] rounded-xl p-3 text-xs leading-relaxed space-y-1.5 shadow-sm ${
-                msg.role === 'user'
-                  ? 'bg-brand-600 text-white rounded-tr-none'
-                  : 'bg-slate-900/80 border border-slate-800 text-slate-200 rounded-tl-none'
-              }`}
+              key={msg.id}
+              className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <p>{msg.text}</p>
-
-              {msg.analogy && (
-                <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/20 text-[11px] text-cyan-200 flex items-start gap-1.5 mt-1">
-                  <Lightbulb size={13} className="text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Analogy: </strong>
-                    {msg.analogy}
-                  </span>
+              {msg.role === 'teacher' && (
+                <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                  <Bot size={13} />
                 </div>
               )}
 
-              <div className={`text-[9px] ${msg.role === 'user' ? 'text-brand-200' : 'text-slate-500'} text-right font-mono`}>
-                {msg.timestamp}
-              </div>
-            </div>
+              <div
+                className={`max-w-[85%] rounded-xl p-3 text-xs leading-relaxed space-y-1.5 shadow-sm ${
+                  msg.role === 'user'
+                    ? 'bg-purple-600 text-white rounded-tr-none font-medium'
+                    : 'bg-purple-50/60 border border-purple-200 text-slate-900 rounded-tl-none font-medium'
+                }`}
+              >
+                <p>{msg.text}</p>
 
-            {msg.role === 'user' && (
-              <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                <User size={13} className="text-slate-300" />
+                {msg.analogy && (
+                  <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-950 flex items-start gap-1.5 mt-1">
+                    <Lightbulb size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Analogy: </strong>
+                      {msg.analogy}
+                    </span>
+                  </div>
+                )}
+
+                <div
+                  className={`text-[9px] ${
+                    msg.role === 'user' ? 'text-purple-200' : 'text-slate-400'
+                  } text-right font-mono`}
+                >
+                  {msg.timestamp}
+                </div>
               </div>
-            )}
-          </div>
-        ))}
+
+              {msg.role === 'user' && (
+                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <User size={13} />
+                </div>
+              )}
+            </div>
+          ))
+        )}
 
         {isAsking && (
-          <div className="flex gap-2.5 items-center text-xs text-slate-400">
-            <div className="w-6 h-6 rounded-full bg-brand-500/20 border border-brand-400/40 flex items-center justify-center shrink-0">
-              <Bot size={13} className="text-brand-300" />
-            </div>
-            <div className="flex items-center gap-1.5 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-bounce" />
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce [animation-delay:0.4s]" />
-              <span className="ml-1 text-[11px] text-slate-400">Teacher is explaining...</span>
-            </div>
+          <div className="flex gap-2 items-center text-xs font-bold text-purple-700 p-2">
+            <div className="w-4 h-4 rounded-full border-2 border-purple-600 border-t-transparent animate-spin" />
+            <span>AI Teacher is thinking of the best explanation...</span>
           </div>
         )}
 
         <div ref={chatBottomRef} />
       </div>
 
-      {/* Suggested Quick Questions */}
-      <div className="p-2 bg-slate-950/50 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto text-[10px]">
-        <span className="text-slate-500 font-semibold uppercase tracking-wider shrink-0 text-[9px] ml-1">
-          Try Asking:
-        </span>
-        {quickPrompts.map((prompt, idx) => (
+      {/* Quick Prompts */}
+      <div className="p-2 bg-purple-50/40 border-t border-purple-100 flex flex-wrap gap-1.5">
+        {quickPrompts.map((q, idx) => (
           <button
             key={idx}
-            onClick={() => handleQuickQuestion(prompt)}
-            className="shrink-0 px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-800 transition-colors whitespace-nowrap"
+            onClick={() => handleQuickQuestion(q)}
+            disabled={isAsking}
+            className="text-[10px] font-semibold bg-white hover:bg-purple-100 text-purple-900 px-2 py-1 rounded-lg border border-purple-200 transition-colors shadow-sm disabled:opacity-40"
           >
-            {prompt}
+            {q}
           </button>
         ))}
       </div>
 
-      {/* Query Input Box */}
-      <div className="p-2.5 bg-slate-900/90 border-t border-slate-800 flex items-center gap-2">
+      {/* Input Area */}
+      <div className="p-3 bg-white border-t border-purple-100 flex items-center gap-2">
         <button
           onClick={toggleMic}
           className={`p-2 rounded-xl border transition-colors ${
             isListeningMic
-              ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse'
-              : 'bg-slate-800 text-slate-400 hover:text-white border-slate-700'
+              ? 'bg-rose-100 border-rose-400 text-rose-700 animate-pulse'
+              : 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
           }`}
-          title="Voice input"
+          title="Voice Ask"
         >
           <Mic size={15} />
         </button>
@@ -157,18 +171,14 @@ export const TeacherDoubtChat: React.FC = () => {
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Ask your AI Teacher any doubt or question..."
-          className="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500"
+          placeholder="Ask a question or request a simple analogy..."
+          className="flex-1 px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
         />
 
         <button
           onClick={handleSend}
           disabled={!inputQuery.trim() || isAsking}
-          className={`p-2 rounded-xl text-white transition-all ${
-            !inputQuery.trim() || isAsking
-              ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700'
-              : 'bg-brand-500 hover:bg-brand-400 shadow-md shadow-brand-500/20'
-          }`}
+          className="purple-gradient-btn p-2 rounded-xl text-xs disabled:opacity-40"
         >
           <Send size={15} />
         </button>

@@ -206,18 +206,26 @@ export interface ConceptReviewItem {
 }
 
 export interface ReportCard {
+  id?: number;
+  user_id?: number;
   assessment_id: number;
-  score_percentage: number;
+  score_percentage?: number;
   total_score: number;
-  max_score: number;
+  max_score?: number;
   passed: boolean;
-  grade: string;
-  teacher_summary: string;
-  mastered_concepts: string[];
-  detected_misconceptions: { concept: string; misconception: string }[];
-  concept_reviews: ConceptReviewItem[];
-  next_recommended_topic: string;
+  grade?: string;
+  teacher_summary?: string;
+  mastered_concepts?: string[];
+  strong_concepts?: string[];
+  weak_concepts?: string[];
+  misconceptions?: string[];
+  detected_misconceptions?: { concept: string; misconception: string }[];
+  concept_reviews?: ConceptReviewItem[];
+  next_recommended_topic?: string;
+  recommended_next_topic?: string;
+  recommended_revision?: string;
   next_recommended_lesson_id?: number | null;
+  created_at?: string;
 }
 
 export interface ConceptRadarPoint {

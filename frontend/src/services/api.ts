@@ -289,5 +289,36 @@ export const documentApi = {
         top_k: topK,
       }),
     });
-  }
+  },
+
+  async analyze(documentId: number): Promise<{
+    topic: string;
+    simple_explanation: string;
+    main_points: string[];
+    key_terms: { term: string; simple_meaning: string }[];
+    core_rules_or_formulas: string[];
+    recommended_stage: string;
+  }> {
+    return request(`/documents/${documentId}/analyze`, {
+      method: 'POST',
+    });
+  },
+
+  async createLesson(documentId: number, stage: string = 'Basic'): Promise<Lesson> {
+    return request<Lesson>(`/documents/${documentId}/create-lesson?stage=${encodeURIComponent(stage)}`, {
+      method: 'POST',
+    });
+  },
+
+  async uploadBatch(files: File[], subject: string = 'General Engineering'): Promise<DocumentItem[]> {
+    const formData = new FormData();
+    files.forEach((f) => formData.append('files', f));
+    formData.append('subject', subject);
+
+    return request<DocumentItem[]>('/documents/upload-batch', {
+      method: 'POST',
+      body: formData,
+    });
+  },
 };
+

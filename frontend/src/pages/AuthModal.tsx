@@ -43,25 +43,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-3xl glass-panel border border-slate-700/60 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-3xl bg-white border border-purple-200 shadow-purple-lg space-y-6">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+          className="absolute top-5 right-5 p-1.5 rounded-xl bg-purple-50 text-slate-500 hover:text-purple-900 hover:bg-purple-100 transition-colors"
         >
           <X size={16} />
         </button>
 
         {/* Title */}
         <div className="text-center space-y-1">
-          <h2 className="text-xl font-display font-black text-white">
+          <h2 className="text-xl font-display font-black text-slate-950">
             {mode === 'login' ? 'Welcome Back to EDUVATAR AI' : 'Join EDUVATAR AI'}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-600 font-medium">
             {mode === 'login'
               ? 'Log in to access your adaptive learning session'
-              : 'Create an account to track your mastery metrics'}
+              : 'Create an account to track your ECE mastery metrics'}
           </p>
         </div>
 
@@ -69,125 +69,92 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         <button
           type="button"
           onClick={handleDemoLogin}
-          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+          className="w-full purple-gradient-btn py-2.5 px-4 rounded-xl text-xs font-bold shadow-purple-md flex items-center justify-center gap-2"
         >
           <Play size={13} className="fill-white" />
-          <span>One-Click Hackathon Evaluator Login</span>
+          <span>One-Click Student / Evaluator Login</span>
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-[1px] bg-slate-800" />
-          <span className="text-[10px] uppercase font-mono text-slate-500">Or Continue With</span>
-          <div className="flex-1 h-[1px] bg-slate-800" />
+          <div className="flex-1 h-[1px] bg-purple-100" />
+          <span className="text-[10px] uppercase font-mono font-bold text-slate-400">Or Continue With</span>
+          <div className="flex-1 h-[1px] bg-purple-100" />
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
             {error}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-slate-900">
           {mode === 'register' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1">Full Name</label>
               <div className="relative">
-                <User size={14} className="absolute left-3.5 top-3 text-slate-500" />
+                <User size={14} className="absolute left-3.5 top-3 text-purple-600" />
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ada Lovelace"
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
+                  placeholder="Your Name"
+                  className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-800 mb-1">Email Address</label>
             <div className="relative">
-              <Mail size={14} className="absolute left-3.5 top-3 text-slate-500" />
+              <Mail size={14} className="absolute left-3.5 top-3 text-purple-600" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="student@example.com"
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
+                placeholder="you@university.edu"
+                className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <label className="block text-xs font-bold text-slate-800 mb-1">Password</label>
             <div className="relative">
-              <Lock size={14} className="absolute left-3.5 top-3 text-slate-500" />
+              <Lock size={14} className="absolute left-3.5 top-3 text-purple-600" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
+                className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
               />
             </div>
           </div>
 
-          {mode === 'register' && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Preferred Teacher Persona</label>
-              <select
-                value={teachingStyle}
-                onChange={(e) => setTeachingStyle(e.target.value)}
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
-              >
-                <option value="Friendly Mentor">Friendly Mentor</option>
-                <option value="Professor">Professor</option>
-                <option value="Patient Tutor">Patient Tutor</option>
-                <option value="Strict Exam Coach">Strict Exam Coach</option>
-              </select>
-            </div>
-          )}
-
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-bold transition-all"
+            className="w-full purple-gradient-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-purple-sm disabled:opacity-50"
           >
-            {isLoading
-              ? 'Processing...'
-              : mode === 'login'
-              ? 'Sign In to Classroom'
-              : 'Create Account'}
+            {isLoading ? <span>Authenticating...</span> : <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>}
           </button>
         </form>
 
-        {/* Toggle Mode */}
-        <div className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800">
-          {mode === 'login' ? (
-            <p>
-              Don't have an account?{' '}
-              <button
-                onClick={() => setMode('register')}
-                className="text-brand-400 hover:underline font-semibold"
-              >
-                Sign Up
-              </button>
-            </p>
-          ) : (
-            <p>
-              Already have an account?{' '}
-              <button
-                onClick={() => setMode('login')}
-                className="text-brand-400 hover:underline font-semibold"
-              >
-                Log In
-              </button>
-            </p>
-          )}
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+            className="text-xs font-bold text-purple-700 hover:text-purple-900"
+          >
+            {mode === 'login'
+              ? "Don't have an account? Create one"
+              : 'Already have an account? Sign in'}
+          </button>
         </div>
       </div>
     </div>

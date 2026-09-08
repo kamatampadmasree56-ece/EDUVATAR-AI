@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   GraduationCap,
@@ -11,10 +11,13 @@ import {
   User as UserIcon,
   LogOut,
   BookMarked,
+  Mic,
+  Volume2,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTeachingStore } from '../../store/useTeachingStore';
 import { demoApi } from '../../services/api';
+import { speechService, VoiceGender } from '../../services/speechService';
 
 interface NavbarProps {
   onOpenAuthModal?: () => void;
@@ -25,6 +28,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuthModal }) => {
   const navigate = useNavigate();
   const { user, logout, loginAsDemoJudge } = useAuthStore();
   const { setLesson } = useTeachingStore();
+  const [voiceMode, setVoiceMode] = useState<VoiceGender>('natural-female');
+  const [showVoiceMenu, setShowVoiceMenu] = useState(false);
 
   const handleLaunchJudgeDemo = async () => {
     try {
@@ -35,6 +40,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuthModal }) => {
     } catch {
       navigate('/teach');
     }
+  };
+
+  const handleVoiceChange = (gender: VoiceGender) => {
+    setVoiceMode(gender);
+    speechService.selectedGender = gender;
+    setShowVoiceMenu(false);
+    // Preview sample speech
+    const sampleText = gender === 'natural-female'
+      ? "Natural Human Teacher voice enabled. Ready for class!"
+      : "Natural Male Professor voice enabled. Let's begin.";
+    speechService.speak(sampleText, { gender });
   };
 
   const navLinks = [
@@ -48,26 +64,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuthModal }) => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-purple-100 bg-white/90 backdrop-blur-xl shadow-purple-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Logo & Brand */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-500 to-cyan-400 p-[1px] shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-all">
-            <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
-              <GraduationCap className="text-cyan-400 group-hover:scale-110 transition-transform" size={20} />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-royal-500 to-indigo-500 p-[2px] shadow-md shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all">
+            <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+              <GraduationCap className="text-purple-600 group-hover:scale-110 transition-transform" size={22} />
             </div>
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-display font-black text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-                EDUVATAR<span className="text-brand-400 font-normal ml-1">AI</span>
+              <span className="font-display font-black text-lg tracking-tight text-slate-950">
+                EDUVATAR<span className="text-purple-600 font-extrabold ml-1">AI</span>
               </span>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30 uppercase tracking-widest font-mono">
-                ADAPTIVE
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200 uppercase tracking-widest font-mono">
+                ECE ADAPTIVE
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 hidden sm:block">
-              The Human-Like Adaptive AI Educator
+            <p className="text-[10px] text-slate-500 font-medium hidden sm:block">
+              PCB • MATLAB • Analog/Digital Circuits • DCD
             </p>
           </div>
         </Link>
@@ -81,43 +97,76 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuthModal }) => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-brand-500/15 text-brand-300 border border-brand-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                    ? 'bg-purple-100 text-purple-800 border border-purple-200 shadow-sm'
+                    : 'text-slate-700 hover:text-purple-900 hover:bg-purple-50/80'
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={14} className={isActive ? 'text-purple-600' : 'text-slate-500'} />
                 <span>{link.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Right CTA / User controls */}
+        {/* Right Controls: Voice Toggle & Demo Button */}
         <div className="flex items-center gap-2.5">
-          {/* Instant Judge Showcase Demo Button */}
+          {/* Natural Voice Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowVoiceMenu(!showVoiceMenu)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-purple-50 border border-purple-200 text-purple-900 hover:bg-purple-100 transition-colors shadow-sm"
+              title="Select Natural Human AI Voice"
+            >
+              <Volume2 size={14} className="text-purple-600" />
+              <span className="hidden sm:inline">
+                {voiceMode === 'natural-female' ? 'Natural Voice (F)' : 'Natural Voice (M)'}
+              </span>
+            </button>
+
+            {showVoiceMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-purple-100 rounded-xl shadow-purple-md p-2 z-50 animate-in fade-in slide-in-from-top-1">
+                <p className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1">AI Voice Tone</p>
+                <button
+                  onClick={() => handleVoiceChange('natural-female')}
+                  className={`w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg flex items-center justify-between ${
+                    voiceMode === 'natural-female' ? 'bg-purple-100 text-purple-900' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>Natural Female (Warm)</span>
+                  {voiceMode === 'natural-female' && <span className="text-purple-600 font-bold">✓</span>}
+                </button>
+                <button
+                  onClick={() => handleVoiceChange('natural-male')}
+                  className={`w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg flex items-center justify-between mt-1 ${
+                    voiceMode === 'natural-male' ? 'bg-purple-100 text-purple-900' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>Natural Male (Clear)</span>
+                  {voiceMode === 'natural-male' && <span className="text-purple-600 font-bold">✓</span>}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Classroom Launcher */}
           <button
             onClick={handleLaunchJudgeDemo}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-brand-600 via-brand-500 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 shadow-lg shadow-brand-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="purple-gradient-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs"
           >
-            <Play size={13} className="fill-white" />
-            <span className="hidden sm:inline">Launch Ohm's Law Demo</span>
-            <span className="sm:hidden">Demo</span>
+            <Play size={13} fill="currentColor" />
+            <span>Launch Classroom</span>
           </button>
 
+          {/* User Auth or Profile */}
           {user ? (
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-              <div className="hidden lg:block text-right text-xs">
-                <div className="font-semibold text-slate-200">{user.full_name}</div>
-                <div className="text-[10px] text-brand-400 font-mono">
-                  {user.profile?.teaching_style || 'Learner'}
-                </div>
-              </div>
+            <div className="flex items-center gap-2 pl-2 border-l border-purple-100">
+              <span className="text-xs font-bold text-slate-800 hidden sm:inline">{user.full_name}</span>
               <button
-                onClick={logout}
-                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 transition-colors"
-                title="Sign Out"
+                onClick={() => logout()}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                title="Logout"
               >
                 <LogOut size={16} />
               </button>
@@ -125,10 +174,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuthModal }) => {
           ) : (
             <button
               onClick={onOpenAuthModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-medium text-slate-300 transition-colors"
+              className="p-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 transition-colors"
+              title="Sign In"
             >
-              <UserIcon size={14} />
-              <span>Sign In</span>
+              <UserIcon size={16} />
             </button>
           )}
         </div>

@@ -14,7 +14,14 @@ from app.routers.analytics import router as analytics_router
 from app.routers.learning_paths import router as learning_paths_router
 from app.routers.speech import router as speech_router
 from app.routers.video import router as video_router
-from app.routers.demo import router as demo_router, seed_ohms_law
+from app.routers.demo import (
+    router as demo_router,
+    seed_ohms_law,
+    seed_pcb_design,
+    seed_matlab_simulink,
+    seed_analog_digital_circuits,
+    seed_dcd_systems,
+)
 from app.utils.logger import logger
 
 @asynccontextmanager
@@ -79,15 +86,27 @@ async def lifespan(app: FastAPI):
 
     Base.metadata.create_all(bind=engine)
     
-    # Ensure demo user and demo Ohm's law lesson exist
+    # Ensure demo user and demo ECE curriculum exist
     db = SessionLocal()
     try:
         logger.info("Verifying default student account and pedagogical curricula...")
         demo_user = ensure_demo_user(db)
         try:
             seed_ohms_law(db, demo_user.id)
+            seed_pcb_design(db, demo_user.id, "Basic")
+            seed_pcb_design(db, demo_user.id, "Advance")
+            seed_pcb_design(db, demo_user.id, "High Level")
+            seed_matlab_simulink(db, demo_user.id, "Basic")
+            seed_matlab_simulink(db, demo_user.id, "Advance")
+            seed_matlab_simulink(db, demo_user.id, "High Level")
+            seed_analog_digital_circuits(db, demo_user.id, "Basic")
+            seed_analog_digital_circuits(db, demo_user.id, "Advance")
+            seed_analog_digital_circuits(db, demo_user.id, "High Level")
+            seed_dcd_systems(db, demo_user.id, "Basic")
+            seed_dcd_systems(db, demo_user.id, "Advance")
+            seed_dcd_systems(db, demo_user.id, "High Level")
         except Exception as seed_err:
-            logger.warning(f"Ohm's Law seed skipped (may already exist): {seed_err}")
+            logger.warning(f"ECE curriculum seed notice: {seed_err}")
             db.rollback()
     except Exception as e:
         logger.error(f"Error during database startup seed: {e}")

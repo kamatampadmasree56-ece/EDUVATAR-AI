@@ -10,7 +10,9 @@ import {
   Sliders,
   Play,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  Cpu,
+  Zap,
 } from 'lucide-react';
 import { lessonApi, documentApi } from '../services/api';
 import { useTeachingStore } from '../store/useTeachingStore';
@@ -21,10 +23,10 @@ export const CurriculumPage: React.FC = () => {
   const { setLesson } = useTeachingStore();
 
   const [mode, setMode] = useState<'topic' | 'document'>('topic');
-  const [topic, setTopic] = useState('');
-  const [subject, setSubject] = useState('Physics');
-  const [targetLevel, setTargetLevel] = useState('Beginner');
-  const [duration, setDuration] = useState(15);
+  const [topic, setTopic] = useState('PCB 4-Layer Stackup & Impedance');
+  const [subject, setSubject] = useState('PCB Design');
+  const [targetLevel, setTargetLevel] = useState<'Basic' | 'Advance' | 'High Level'>('Basic');
+  const [duration, setDuration] = useState(25);
   const [language, setLanguage] = useState('English');
   const [teachingStyle, setTeachingStyle] = useState('Friendly Mentor');
   const [selectedDocId, setSelectedDocId] = useState<number | undefined>(undefined);
@@ -61,8 +63,7 @@ export const CurriculumPage: React.FC = () => {
       setLesson(generated);
       navigate('/teach');
     } catch (err: any) {
-      setError(err.message || 'Failed to generate curriculum. Loading demo lesson.');
-      // Offline fallback: navigate to classroom
+      setError(err.message || 'Failed to generate curriculum. Loading classroom.');
       navigate('/teach');
     } finally {
       setIsGenerating(false);
@@ -78,219 +79,168 @@ export const CurriculumPage: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-xs font-semibold uppercase tracking-wider">
-          <Sparkles size={13} className="text-cyan-400" />
-          <span>Intelligent Curriculum Orchestrator</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-900 text-xs font-bold uppercase tracking-wider">
+          <Sparkles size={13} className="text-purple-600" />
+          <span>ECE Curriculum Orchestrator</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-display font-black text-white">
+        <h1 className="text-3xl sm:text-4xl font-display font-black text-slate-950">
           Generate a Personalized Curriculum
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400">
-          EDUVATAR AI plans a structured, multi-section interactive learning path calibrated specifically to your background and speed.
+        <p className="text-xs sm:text-sm text-slate-600 font-medium">
+          EDUVATAR AI plans a structured, multi-section interactive learning path calibrated for <strong className="text-purple-700">PCB Design</strong>, <strong className="text-purple-700">MATLAB</strong>, <strong className="text-purple-700">Analog & Digital Circuits</strong>, or <strong className="text-purple-700">DCD</strong>.
         </p>
       </div>
 
       {/* Main Generator Form Card */}
-      <div className="p-6 sm:p-8 rounded-3xl glass-panel border border-slate-800 shadow-2xl max-w-3xl mx-auto">
+      <div className="purple-white-card p-6 sm:p-8 bg-white border-purple-200 shadow-purple-md max-w-3xl mx-auto space-y-6">
         {/* Mode Selector */}
-        <div className="flex p-1 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
+        <div className="flex p-1 rounded-2xl bg-purple-50 border border-purple-200">
           <button
             type="button"
             onClick={() => setMode('topic')}
-            className={`flex-1 py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
               mode === 'topic'
-                ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/25'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-purple-600 text-white shadow-purple-sm'
+                : 'text-slate-700 hover:text-purple-900 hover:bg-purple-100/50'
             }`}
           >
-            <BookOpen size={15} />
-            <span>Generate by Topic / Concept</span>
+            <BookOpen size={14} />
+            <span>By Topic Concept</span>
           </button>
           <button
             type="button"
             onClick={() => setMode('document')}
-            className={`flex-1 py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
               mode === 'document'
-                ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/25'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-purple-600 text-white shadow-purple-sm'
+                : 'text-slate-700 hover:text-purple-900 hover:bg-purple-100/50'
             }`}
           >
-            <FileText size={15} />
-            <span>Grounded on Uploaded Textbook / PDF</span>
+            <FileText size={14} />
+            <span>From Uploaded PDF Document</span>
           </button>
         </div>
 
-        <form onSubmit={handleGenerate} className="space-y-5">
+        <form onSubmit={handleGenerate} className="space-y-5 text-slate-900">
           {mode === 'topic' ? (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                Topic or Concept You Want to Master
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Topic or Specialized Concept:
               </label>
               <input
                 type="text"
-                required
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Ohm's Law, Quantum Superposition, Neural Networks, Bayes' Theorem"
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                placeholder="e.g. PCB Differential Pairs, Simulink PID Tuning, CMOS Inverters"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
+                required
               />
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                Select Uploaded Document Source
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Select Uploaded Document:
               </label>
-              {documents.length > 0 ? (
-                <select
-                  value={selectedDocId || ''}
-                  onChange={(e) => {
-                    const id = Number(e.target.value);
-                    setSelectedDocId(id);
-                    const doc = documents.find((d) => d.id === id);
-                    if (doc) setTopic(doc.title);
-                  }}
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500"
-                >
-                  <option value="">-- Choose a document --</option>
-                  {documents.map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.title} ({doc.file_type.toUpperCase()} • {doc.total_pages} pages)
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div className="p-4 rounded-xl bg-slate-900/60 border border-dashed border-slate-700 text-center space-y-2">
-                  <p className="text-xs text-slate-400">No documents uploaded yet.</p>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/documents')}
-                    className="px-3 py-1.5 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-semibold hover:bg-brand-500/30"
-                  >
-                    Upload Textbook or Lecture Slides
-                  </button>
-                </div>
-              )}
+              <select
+                value={selectedDocId}
+                onChange={(e) => setSelectedDocId(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
+              >
+                {documents.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.title} ({d.subject})
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 
-          {/* Grid Settings */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Subject */}
+          {/* Grid of options: Subject, Level, Duration */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subject Domain</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Subject Area:
+              </label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="Physics">Physics & Electrical Engineering</option>
-                <option value="Computer Science">Computer Science & AI</option>
-                <option value="Mathematics">Mathematics & Calculus</option>
-                <option value="Chemistry">Chemistry & Materials</option>
-                <option value="Biology">Biology & Medicine</option>
+                <option value="PCB Design">PCB Design</option>
+                <option value="MATLAB">MATLAB & Simulink</option>
+                <option value="Analog and Digital Circuits">Analog & Digital Circuits</option>
+                <option value="DCD">DCD (Digital Circuit Design)</option>
               </select>
             </div>
 
-            {/* Target Level */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Target Difficulty Level</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Stage Level:
+              </label>
               <select
                 value={targetLevel}
-                onChange={(e) => setTargetLevel(e.target.value)}
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                onChange={(e) => setTargetLevel(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="Beginner">Beginner (Foundational Intuition & Analogies)</option>
-                <option value="Intermediate">Intermediate (Formulas, Equations & Derivations)</option>
-                <option value="Advanced">Advanced (Rigorous Proofs & Edge Cases)</option>
+                <option value="Basic">Basic (Foundations)</option>
+                <option value="Advance">Advance (Engineering Analysis)</option>
+                <option value="High Level">High Level (Mastery & Standards)</option>
               </select>
             </div>
 
-            {/* Teaching Style */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">AI Teacher Persona</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Target Duration:
+              </label>
               <select
-                value={teachingStyle}
-                onChange={(e) => setTeachingStyle(e.target.value)}
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-slate-900 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="Friendly Mentor">Friendly Mentor (Warm, encouraging, analogies)</option>
-                <option value="Professor">Professor (Structured, academic rigor)</option>
-                <option value="Patient Tutor">Patient Tutor (Gentle step-by-step guidance)</option>
-                <option value="Strict Exam Coach">Strict Exam Coach (High-speed, trap questions)</option>
-                <option value="Coding Mentor">Coding Mentor (Practical, hands-on)</option>
-              </select>
-            </div>
-
-            {/* Preferred Language */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Instruction Language</label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
-              >
-                <option value="English">English</option>
-                <option value="Hindi">Hindi</option>
-                <option value="Hinglish">Hinglish (Colloquial mix)</option>
-                <option value="Telugu">Telugu</option>
-                <option value="Tamil">Tamil</option>
-                <option value="Spanish">Spanish</option>
+                <option value={15}>15 Minutes (Express)</option>
+                <option value={25}>25 Minutes (Standard)</option>
+                <option value={45}>45 Minutes (Deep Dive)</option>
               </select>
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={isGenerating}
-            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-brand-600 via-brand-500 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white text-sm font-bold shadow-xl shadow-brand-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01]"
+            className="w-full purple-gradient-btn py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-purple-md disabled:opacity-50"
           >
             {isGenerating ? (
-              <>
-                <RefreshCw size={16} className="animate-spin" />
-                <span>Orchestrating Adaptive Curriculum...</span>
-              </>
+              <span>Orchestrating Socratic Curriculum...</span>
             ) : (
               <>
-                <Sparkles size={16} />
-                <span>Build Curriculum & Enter Classroom</span>
+                <Sparkles size={15} />
+                <span>Generate Curriculum & Launch Classroom</span>
               </>
             )}
           </button>
         </form>
       </div>
 
-      {/* Previously Generated Curriculums */}
+      {/* Recent Lessons */}
       {recentLessons.length > 0 && (
         <div className="space-y-4 max-w-3xl mx-auto">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-            Your Active Curriculums
+          <h3 className="text-base font-bold text-slate-950">
+            Recent Curricula & Progress
           </h3>
-          <div className="grid grid-cols-1 gap-3">
-            {recentLessons.map((l) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {recentLessons.slice(0, 4).map((l) => (
               <div
                 key={l.id}
-                className="p-4 rounded-2xl glass-card border border-slate-800 flex items-center justify-between gap-4 hover:border-brand-500/40 transition-colors"
+                onClick={() => handleResumeLesson(l)}
+                className="purple-white-card p-4 bg-white border-purple-100 hover:border-purple-300 cursor-pointer flex items-center justify-between"
               >
-                <div className="space-y-1 truncate">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white truncate">{l.title}</span>
-                    <span className="text-[10px] bg-brand-500/10 text-brand-300 px-2 py-0.5 rounded font-mono">
-                      {l.subject}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 truncate">
-                    {l.total_sections} sections • Mastery: {Math.round(l.current_mastery)}%
-                  </p>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{l.title}</h4>
+                  <p className="text-[10px] text-purple-700 font-semibold">{l.subject} • {l.target_level}</p>
                 </div>
-
-                <button
-                  onClick={() => handleResumeLesson(l)}
-                  className="px-3.5 py-1.5 rounded-xl bg-brand-500/20 hover:bg-brand-500 text-brand-300 hover:text-white border border-brand-500/40 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors"
-                >
-                  <Play size={12} className="fill-current" />
-                  <span>Resume</span>
-                </button>
+                <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
+                  <Play size={14} fill="currentColor" />
+                </div>
               </div>
             ))}
           </div>
